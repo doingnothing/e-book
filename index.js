@@ -96,3 +96,103 @@ for (var i = count; i < len; i = i + 1) {
 
 }
 
+
+
+
+/**
+ * Created by Administrator on 2015/11/26.
+ */
+function runLottey(Elem){
+    //1获取画布
+    var context=Elem.getContext('2d');
+    //2图片加载
+    var as=new Image();
+    as.src="img/as.png";
+    var pin=new Image();
+    pin.src="img/pin.png";
+    //pin.height=301;
+    //pin.width=358;
+
+
+
+    const HEIGHT=Elem.height;
+    const WIDTH=Elem.width;
+    context.translate(WIDTH/2,HEIGHT/2);
+    /*as.onload=function(){
+     context.drawImage(as,-as.width/2,-as.height/2);
+
+     }
+     pin.onload=function(){
+     context.drawImage(pin,-pin.width/2+10,-pin.height/2-10)
+     }
+
+
+     //定义start（）方法
+     var startTime,timer;
+     this.start=function(){
+     // context.translate(WIDTH/2,-HEIGHT/2);
+     running();
+     startTime=new Date().getTime();
+     timer=setInterval(running,50)
+
+     }
+     var pie=Math.PI/20;
+     var running=function (){
+     pie+=Math.PI/20;
+     context.rotate(pie);
+     context.drawImage(as,-as.width/2,-as.height/2);
+     context.rotate(-pie);
+     context.drawImage(pin,-pin.width/2+10,-pin.height/2-10);
+     var endTime=new Date().getTime();
+     if (endTime-startTime>=10000){
+     clearInterval(timer);
+     }
+     }*/
+    var pie=Math.random()*(Math.PI*2);
+    var addPie=0;
+    var add=Math.PI/180;
+    var startTime;
+    var timer=setInterval(draw,50);
+    function draw(){
+        //旋转后，每次增加的角度+addPie
+        if (addPie==0){
+            addPie+=addPie;
+        }else {
+            addPie+=add;
+        }
+        //旋转并绘制转盘图片
+        context.rotate(pie+addPie);
+        myDraw(as,-as.width/2,-as.height/2);
+        //绘制指针
+        context.rotate(-(pie+addPie));
+        myDraw(pin,-pin.width/2+10,-pin.height/2-10);
+
+        //获取当前时间
+        var endTime=new Date().getTime();
+        if ((endTime-startTime)<=5000){
+            //加速旋转
+            add+=Math.PI/360;
+
+        }else if((endTime-startTime)>=5000&&(endTime-startTime)<10000){
+            add-=Math.PI/360;
+        } else if ((endTime-startTime)>=10000){
+            clearInterval(timer);
+            timer=null;
+            $('#btnLottery').removeAttr("disabled","disabled")
+        }
+    }
+    function start(){
+        addPie=Math.PI/180;
+        startTime=new Date().getTime();
+        $('#btnLottery').attr("disabled","disabled");
+    }
+
+    //3绘制图片的方法
+    function myDraw(img,x,y){
+        context.drawImage(img,x,y);
+    }
+
+    return start
+
+}
+
