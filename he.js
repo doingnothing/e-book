@@ -26,4 +26,3 @@ for (var i = 0, len = data.sub.length; i < len; i = i + 1) {
 }
 fs.write("./d.json", JSON.stringify(d), "w");
 phantom.exit();
-test(
