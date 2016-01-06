@@ -1,87 +1,122 @@
-
 var fs = require("fs");
 var webpage = require("webpage");
 var books = require("./urls.json");
-var from = 0, to = books.length;
 
+var open = function (url, i, cb) {
 
+    console.log(i, url);
 
-var open = function (url, cb) {
-
-    console.log(url);
     var page = webpage.create();
 
     page.viewportSize = {width: 1920, height: 1200};
 
     page.settings.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2591.0 Safari/537.36";
+    page.settings.resourceTimeout = 3000;
+    var urls = {};
 
-    var urls;
+    page.onResourceTimeout = function () {
+        console.log("timeout");
+        handler("doingnothing: finish");
+    };
 
-    page.onConsoleMessage = function (msg) {
+    var handler = function (msg) {
 
-        console.log(msg);
+        if (msg.indexOf("doingnothing: ") === -1) {
+            return;
+        }
+
+        msg = msg.replace("doingnothing: ", "");
+
+        console.log("msg >> " + msg);
+
         if (msg === "finish") {
             console.log("finish: " + url);
-            cb(urls);
+            urls.url = url;
+            cb(urls, i);
             return;
         }
 
         try {
             urls = JSON.parse(msg);
         } catch (e) {
-            console.log(e.name + ": " + e.message);
+            console.log("out >> " + e.name + ": " + e.message);
         }
     };
+
+    page.onConsoleMessage = handler;
+
+
     page.open(url, function (status) {
+
 
         if (status === "success") {
 
             page.evaluate(function () {
 
-                window.onload = function () {
-                    //document.addEventListener("DOMContentLoaded", function () {
 
-                    setTimeout(function () {
-                        var book = {};
-                        var desc = document.getElementsByClassName("desc")[0];
+                var a = function () {
+                    var book = {};
+                    var desc = document.getElementsByClassName("desc")[0];
 
-                        book.title = desc.querySelector("h3").textContent;
-                        try {
-                            book.score = desc.getElementsByClassName("score")[0].textContent;
-                        } catch (e) {
+                    if (!desc) {
+                        window.onload = a;
+                    }
 
-                            console.log(e.name + ": " + e.message);
-                        }
+                    book.title = desc.querySelector("h3").textContent;
+                    try {
                         book.reviewCount = desc.querySelector(".num > span").textContent;
+                    } catch (e) {
+                    }
+                    try {
                         book.author = desc.querySelector(".author > a").textContent;
-                        var l = book.author.indexOf("【");
-                        var r = book.author.indexOf("】");
-                        if (l > -1) {
-                            book.country = book.author.slice(l + 1, r);
-                            book.author = book.author.slice(r + 1);
-                        } else {
-                            book.country = "中国";
-                        }
+                    } catch (e) {
+
+                        book.author = desc.querySelector(".author > span").textContent;
+                    }
+
+                    try {
                         book.published = desc.querySelector(".published > a").textContent;
+                    } catch (e) {
+                    }
+                    try {
+                        book.score = desc.querySelector(".score").textContent;
+                    } catch (e) {
+                    }
+                    try {
                         var date = desc.querySelector("tr:last-child").childNodes[1];
                         book.date = date.textContent;
+                    } catch (e) {
+                    }
+
+                    try {
                         book.price = desc.querySelector(".price > em").textContent.replace("¥ ", "");
                         var temp = desc.querySelectorAll(".price > i");
                         book.oldPrice = temp[0].querySelector("del").textContent.replace("¥ ", "");
+
                         book.paperPrice = temp[1].querySelector("del").textContent.replace("¥ ", "");
-                        book.size = document.querySelector(".size").textContent.replace("万字", "");
+
+                    } catch (e) {
+                    }
+
+                    try {
+                        book.size = document.querySelector(".size").textContent;
+                    } catch (e) {
+                    }
+                    try {
                         var list = document.querySelectorAll(".u-taglist > ul a");
                         book.marks = [];
                         for (var i = 0, len = list.length; i < len; i = i + 1) {
                             book.marks.push(list[i].textContent);
                         }
+                    } catch (e) {
+                    }
 
-                        console.log(JSON.stringify(book));
-                        console.log("finish");
-                        //});
-                    }, 1000);
-                }
+                    console.log("doingnothing: " + JSON.stringify(book));
 
+                    console.log("doingnothing: finish");
+                };
+
+                a();
 
             });
 
@@ -94,21 +129,88 @@ var open = function (url, cb) {
 
 var db = [];
 
-to = 0;
-var max = to - from + 1;
-var count = 0;
+var MAX = books.length;
 
-for (var i = from; i <= to; i = i + 1) {
-    open(books[i], function (book) {
+var COUNT = 0;
 
-        console.log(book);
+var step = 20;
 
-        db.push(book);
-        count = count + 1;
+//console.log(step);
 
-        if (count >= max) {
-            fs.write("./books.json", JSON.stringify(db), "w");
-            phantom.exit();
+var one = function (from, to) {
+
+    if (to > MAX) {
+        to = MAX;
+    }
+
+    var max = to - from;
+
+    var count = 0;
+
+    console.log(from, to);
+
+    var q = [];
+    var xx = function (a) {
+        var q1;
+
+        for (var i = 0, len = q.length; i < len; i  = i + 1) {
+            if (q[i] > a) {
+                q1 = q.slice(0, i).concat([a]).concat(q.slice(i));
+                i = len + 1;
+            }
         }
-    });
-}
+
+        if (i === len) {
+
+            q1 = q.concat([a]);
+        }
+
+        q = q1;
+    };
+
+    for (var i = from; i < to; i = i + 1) {
+
+        open(books[i], i, function (book, i) {
+
+            xx(i);
+
+            console.log(q);
+
+            db.push(book);
+            count = count + 1;
+            COUNT = COUNT + 1;
+
+            //console.log(count, max);
+
+            if (count >= max) {
+
+                console.log(COUNT);
+                fs.write("./books" + "." + COUNT + ".json", JSON.stringify(db), "w");
+
+                db = [];
+
+                if (COUNT >= MAX) {
+
+                    phantom.exit();
+
+                } else {
+
+                    //console.log("more");
+
+                    setTimeout(function () {
+
+                        one(to, to + step)
+
+                    }, 2000);
+
+                }
+            }
+        });
+    }
+};
+COUNT = 1476;
+console.log(books[1015]);
+console.log(MAX);
+one(COUNT, COUNT + step);
+//COUNT = 1;
+//one(0,1);
