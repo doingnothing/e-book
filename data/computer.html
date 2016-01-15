@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            font-family: Consolas;
+        }
+        canvas {
+            border: 1px solid #000;
+        }
+        #cart {
+            position: relative;
+            width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .label {
+            position: relative;
+            top: -50px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<div id="cart">
+    <canvas id="canvas" width="500" height="500"></canvas>
+    <p class="label">
+        <span id="y">core</span><br>
+        <br>
+        <span id="x">price</span>
+    </p>
+</div>
+<script src="computer.js"></script>
+<script>
+    var qs = function (str) {
+        return document.querySelector(str);
+    };
+    var can = qs("#canvas");
+
+    var ctx = can.getContext("2d");
+
+
+    var revert = function (y) {
+        return 500 - y;
+    };
+    var a = 4;
+    var drawPoint = function (p) {
+        ctx.fillStyle = "#080";
+        ctx.fillRect(p.x - a / 2, revert(p.y - a / 2), a, a);
+    };
+    var drawLine = function (point1, point2) {
+        ctx.strokeStyle = "#A00";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(point1.x, revert(point1.y));
+        ctx.lineTo(point2.x, revert(point2.y));
+        ctx.closePath();
+        ctx.stroke();
+    };
+
+    // price oldPrice
+    //    computer.map(function (values) {
+    //        values.map(function (value) {
+    //            if (value.oldPrice) {
+    //                var x = parseFloat(value.price) * 5;
+    //                var y = parseFloat(value.oldPrice) * 5;
+    //                if (x > 500 || y > 500) {
+    //                    console.log("500: ", x, y, value.url);
+    //                }
+    //                if (x > y) {
+    //                    console.log(value.url, x / 5, y / 5);
+    //                }
+    //                drawPoint(x, y);
+    //            }
+    //        });
+    //    });
+
+    // size, oldPrice
+    //    computer.map(function (values) {
+    //        values.map(function (value) {
+    //            if (value.oldPrice && value.size && value.size.indexOf("万字") > -1) {
+    //                var x = parseFloat(value.size) * 5;
+    //                var y = parseFloat(value.oldPrice) * 5;
+    //                if (x > 500 || y > 500) {
+    //                    console.log("500: ", x, y, value.url);
+    //                }
+    //                drawPoint(x, y);
+    //            }
+    //        });
+    //    });
+
+    // reviewCount score
+    var m = function (xName, yName, cb) {
+        computer.map(function (values) {
+            values.map(function (value) {
+                if (value[xName] && value[yName]) {
+                    var x = parseFloat(value[xName]);
+                    var y = parseFloat(value[yName]);
+                    if (x === x && y === y) {
+                        drawPoint(cb(x, y, value));
+                    }
+                }
+            });
+        });
+    };
+    var int = function (str) {
+        return parseFloat(str);
+    };
+    m("reviewCount", "score", function (x, y, value) {
+        return {
+            x: int(value.price),
+            y: y / x * 100
+        };
+    });
+    drawLine({x: 0, y: 0}, {x: 500, y: 500});
+
+</script>
+</body>
+</html>
