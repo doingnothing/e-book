@@ -1,0 +1,22 @@
+{
+  "name": "e-book-study",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doingnothing/e-book-study.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/doingnothing/e-book-study/issues"
+  },
+  "homepage": "https://github.com/doingnothing/e-book-study#readme",
+  "dependencies": {
+    "crawler": "^0.4.3"
+  }
+}
