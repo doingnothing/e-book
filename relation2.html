@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body > div {
+            padding: 50px 0;
+            width: 600px;
+            height: 500px;
+        }
+
+        a {
+            color: yellow;
+        }
+    </style>
+</head>
+<body>
+<script src="libs/echarts.min.js"></script>
+<script src="libs/jquery-2.2.3.min.js"></script>
+<script>
+//    var a = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 10000];
+    var a = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 10000];
+    var xxx = function (data, value) {
+
+        var range = function (data, from, to, at) {
+            if (!data[at]) {
+                data[at] = {
+                    name: from + ' ~ ' + to,
+                    value: 1
+                }
+            } else {
+                data[at].value += 1;
+            }
+        };
+
+
+        var at;
+        for (var i = 0, max = a.length; i < max; i = i + 1) {
+            if (a[i] > value) {
+                at = i;
+                break;
+            }
+        }
+        var from = at === 0 ? 0 : a[at - 1];
+        var to = a[at];
+        range(data, from, to, at);
+    };
+
+    var make = function (title, url, xTitle, xName) {
+        $.getJSON(url).success(function (json) {
+            var data = [];
+            json.map(function (ele) {
+                xxx(data, ele[xName]);
+            });
+
+            for (var i = 0, max = data.length; i < max; i = i + 1) {
+                if (!data[i]) {
+                    var from = i === 0 ? 0 : a[i - 1];
+                    var to = a[i];
+                    data[i] = {
+                        value: 0,
+                        name: from + '~' + to
+                    }
+                }
+            }
+
+            console.log(data);
+
+            var option = {
+                title: {
+                    text: title + '-' + xTitle,
+                    x: 'center',
+                    y: 20
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{b} : {c} ({d}%)"
+                },
+                series: [
+                    {
+                        name: '访问来源',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['50%', '60%'],
+                        data: data,
+                        itemStyle: {
+                            emphasis: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+
+            var div = document.createElement('div');
+            document.body.appendChild(div);
+            var myChart = echarts.init(div);
+            myChart.setOption(option);
+        });
+    };
+
+    make('计算机', 'data/computer.json', '现价', 'price');
+    make('计算机', 'data/computer.json', '定价', 'oldPrice');
+    make('计算机', 'data/computer.json', '纸质书定价', 'paperPrice');
+
+    make('小说', 'data/xiaoshuo.json', '现价', 'price');
+    make('小说', 'data/xiaoshuo.json', '定价', 'oldPrice');
+    make('小说', 'data/xiaoshuo.json', '纸质书定价', 'paperPrice');
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
-//var metas = require('./computer-meta.json');
-var metas = require('./xiaoshuo-meta.json');
+//var metas = require('./data/computer-meta.json');
+var metas = require('./data/xiaoshuo-meta.json');
 
 var data = [];
 var xxx = function (str) {
@@ -25,12 +25,12 @@ var yyy = function (str) {
 };
 console.log(metas.length);
 metas.filter(function (ele, index) {
-    return ele.currentPrice && ele.oldPrice && ele.paperPrice;
+    return ele.currentPrice && ele.oldPrice && ele.paperPrice && xxx(ele.currentPrice);
 }).map(function (ele, index) {
     var n_s = yyy(ele.size);
     var one = {
         name: ele.name,
-        price: xxx(ele.currentPrice),
+        price: xxx(ele.currentPrice) || 0,
         oldPrice: xxx(ele.oldPrice),
         paperPrice: xxx(ele.paperPrice),
         score: +ele.score,
@@ -49,6 +49,5 @@ metas.filter(function (ele, index) {
 });
 console.log(data.length);
 
-//require('fs').writeFileSync('computer.json', JSON.stringify(data), 'utf8');
-
-require('fs').writeFileSync('xiaoshuo.json', JSON.stringify(data), 'utf8');
+//require('fs').writeFileSync('data/computer.json', JSON.stringify(data), 'utf8');
+require('fs').writeFileSync('data/xiaoshuo1.json', JSON.stringify(data), 'utf8');
